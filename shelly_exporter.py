@@ -362,6 +362,9 @@ class Static:
     resp.set_header('Content-Type', prom.exposition.CONTENT_TYPE_LATEST)
     resp.text = prom.exposition.generate_latest(metrics)
 
+class quietRequestHandler(simple_server.WSGIRequestHandler):
+    def log_message(self, format, *args):
+        pass
 
 def run(cfg):
   api = falcon.App()
@@ -370,13 +373,13 @@ def run(cfg):
   api.add_route('/metrics', Static(cfg['targetcfg'], cfg['static_targets'], cfg['username'],
     cfg['password'], metrics_file, cfg['timeout']))
   api.add_route('/probe', Prober(cfg['targetcfg'], metrics_file, cfg['timeout']))
-  httpd = simple_server.make_server(cfg['listen_ip'], cfg['listen_port'], api)
+  httpd = simple_server.make_server(cfg['listen_ip'], cfg['listen_port'], api, handler_class=quietRequestHandler)
   httpd.serve_forever()
 
 
 def cli_env(env, default=None):
   _env = f"SHELLY_{env}"
-  return os.environ.get(_env) if os.environ.get(_env) is not None else default
+  return os.environ.get(_env) if os.environ.get(_env) is not None else defau560745lt
 
 default_cfg = {
   'listen_ip': '0.0.0.0',
